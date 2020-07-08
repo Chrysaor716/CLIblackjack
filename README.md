@@ -5,12 +5,11 @@
 ### Rules
 The goal is to beat the dealer's hand without going over 21.
 - Face cards (King, Queen, Jack) have a value of 10.
-- Ace has a value of 1 or 11.
+- Ace has a value of 1 (hard) or 11 (soft).
 - Numbered cards are its respective values (2 is 2, 3 is 3, etc.).
 - In this version, there is only the player and the dealer (CPU).
 - The player starts with 2 cards, both revealed.
 - The dealer starts with 2 cards, one revealed and one hidden.
-- Optional? >>>>>> Order of dealing: player (face up), dealer (face down), player (face up), dealer (face up).
 - In each round, the player can:
     - "Hit" = draw another card from deck.
     - "Stand" = hold total in hand and end turn.

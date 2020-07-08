@@ -1,4 +1,6 @@
-//#include <iostream> //TODO: TEMPORARY FOR DEBUGGING; REMOVE LATER
+#include <cstdlib> // for rand(), srand()
+#include <ctime> // for time()
+#include <utility> // for swap() (C++11) (use <algorithm> for C++98)
 
 #include "Deck.h"
 
@@ -8,6 +10,7 @@ Card::Card(string type, int index, int value) {
     mType = type;
     mIndex = index;
     mValue = value;
+    // Optionally add suit here
 }
 
 string Card::getType() {
@@ -38,27 +41,34 @@ Deck::Deck() {
     }
     // King, Queen, Jack (face cards)
     for(int i = 40; i < 52; i++) {
-        string type = "King";
+        string type = "Jack";
         if(i % 3 == 0) type = "King";
         else if(i % 3 == 1) type = "Queen";
-        else type = "Jack";
+        else type = "Jack"; // note: this line is technically optional
         cards.push_back(Card(type, i, 10));
     }
     // Optionally, adding Joker cards would go here
 }
 
 void Deck::shuffle() {
-    /*
-    // DEBUGGING:
-    // TODO: REMOVE BELOW DEBUGGING CODE AND REPLACE WITH IMPLEMENTATION
+    srand(time(nullptr)); // initialize seed for randomization based on clock
+    // Goes through each index of deck and swaps its element with another
+    //      randomly chosen card ranging from itself to the end of the deck.
     for(int i = 0; i < NUM_CARDS_IN_DECK; i++) {
-        std::cout << "i: " << i << std::endl;
-        std::cout << "card info:" << std::endl;
-        std::cout << "type > " << cards[i].getType() << std::endl;
-        std::cout << "value > " << cards[i].getValue() << std::endl;
-        std::cout << "------------\n";
+        // Swap the current card with itself or any of the remaining cards in deck
+        int randIdx = i + (rand() % (NUM_CARDS_IN_DECK - i));
+        std::swap(cards[i], cards[randIdx]);
     }
-    */
+}
+
+Card Deck::draw() {
+    Card card = cards.back();
+    cards.pop_back(); // remove card from top of deck
+    return card;
+}
+
+void Deck::returnCard(Card card) {
+    cards.insert(cards.begin(), card);
 }
 
 Deck::~Deck() {}
