@@ -21,7 +21,7 @@ int Card::getValue() {
     return mValue;
 }
 
-int Card::setValue(int val) {
+void Card::setValue(int val) {
     mValue = val;
 }
 

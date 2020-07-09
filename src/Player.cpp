@@ -42,10 +42,10 @@ bool Player::hasSoftAce() {
 }
 
 bool Player::bust() {
-    // If there are any soft Aces in hand, downsize them
-    if(hasSoftAce())
+    // Downsize any soft Aces to avoid busting
+    if(hasSoftAce() && handTotal > 21)
         toggleAce();
-    // Player has busted if over 21 at this point
+    // Player has busted if still over 21 at this point
     if(handTotal > 21)
         return true;
     return false;

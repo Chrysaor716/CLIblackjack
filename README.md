@@ -1,6 +1,31 @@
 # Command line blackjack
 
 ### Compiling and running:
+**Prerequisites**:
+Simply needs a terminal that can run `make`, which uses g++ to compile with C++11.    
+
+In the top level directory (where `makefile` is located), run:
+```
+make
+```
+Alternatively, run the command manually:
+```
+cd src/
+g++ -std=c++11 BlackJack.cpp Deck.cpp Player.cpp Game.cpp -o BlackJack
+```
+Run the executable:
+```
+./BlackJack
+```
+
+To clean:
+```
+make clean
+```
+Or simply `cd` into the directory containing the executable and remove it:
+```
+rm BlackJack
+```
 
 ### Rules
 The goal is to beat the dealer's hand without going over 21.
@@ -15,7 +40,7 @@ The goal is to beat the dealer's hand without going over 21.
     - "Stand" = hold total in hand and end turn.
 - If you are dealt 21 from the start (10 and Ace), you get a blackjack! This means you automatically win the round.
 - A "bust" happens when your hand goes over 21. In this case, the dealer wins regardless of their hand.
-- Once the player ends their turn, the dealer reveals the hidden card and then can also choose to hit until they stand.
+- Once the player ends their turn, the dealer reveals the hidden card.
 - Dealer will hit until their total is 17 or higher.
 - If the dealer goes over 21 (bust), the player wins the round.
 - If the player's hand equals the dealer's hand, then it is a tie.

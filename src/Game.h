@@ -10,8 +10,6 @@
 class Game {
 public:
     Game();
-    // Main fuction checks status to determine whether to terminate program
-    int getExitStatus();
     // Prompts user whether to start a new round
     void pending();
     // Deals cards to Players' hands
