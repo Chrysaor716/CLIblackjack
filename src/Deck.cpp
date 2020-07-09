@@ -21,7 +21,7 @@ int Card::getValue() {
     return mValue;
 }
 
-int Card::changeValue(int val) {
+int Card::setValue(int val) {
     mValue = val;
 }
 
@@ -63,11 +63,16 @@ void Deck::shuffle() {
 
 Card Deck::draw() {
     Card card = cards.back();
+    // Back of deck is considered top
     cards.pop_back(); // remove card from top of deck
     return card;
 }
 
 void Deck::returnCard(Card card) {
+    // Aces must be returned to deck as soft Aces by default
+    if(card.getType() == "Ace")
+        card.setValue(11);
+    // Beginning of deck is considered bottom
     cards.insert(cards.begin(), card);
 }
 

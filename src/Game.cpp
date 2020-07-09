@@ -10,7 +10,6 @@ Game::Game() {
     round = 0;
     //deck.shuffle(); // Note: this is technically optional since it shuffles at the beginning anyway
     // Print intro info at start (optionally put this into separate helper function)
-    cout << "__________________\n";
     cout << "|    BLACKJACK    |\n";
     cout << "Please refer to README for rules\n";
 }
@@ -24,6 +23,7 @@ void Game::pending() {
         }
         user.clearHand();
         // Alternatively, one could iteratively pop cards from hand and add to bottom of deck
+        //      (more "realistic") instead of "copying" the hand and clearing the hand
     }
     if(!dealer.getHand().empty()) {
         for(auto card : dealer.getHand()) {
@@ -107,6 +107,7 @@ void Game::userTurn() {
         hitOrStand(input);
         // User chooses to hit
         while(input == "h" || input == "H") {
+            cout << "You hit!\n";
             user.addToHand(deck.draw());
             if(user.getHandTotal() > 21) {
                 // Checks if there are any hard Aces to downsize
@@ -119,7 +120,7 @@ void Game::userTurn() {
                 }
             }
             user.showHand();
-            dealer.showHand(); //show dealer's hand alongside user's
+            //dealer.showHand(); //show dealer's hand alongside user's
             // If user is at exactly 21, move on to dealer's turn
             if(user.getHandTotal() == 21) {
                 cout << "---> 21! Your turn automatically ends. Dealer's turn...\n"; // let user know their turn has ended
@@ -136,8 +137,9 @@ void Game::userTurn() {
 void Game::dealerTurn() {
     cout << "Dealer moving...\n";
     dealer.setTurn(true); // adds wildcard to dealer's hand and sum
-    user.showHand(); // show user's hand alongside dealer's hand
+    //user.showHand(); // show user's hand alongside dealer's hand
     dealer.showHand(); // reveal wildcard
+
     // At dealer's turn:
     // - They must hit until their total is 17+
     // - If they hit 17 with a soft Ace, they must hit again
@@ -145,25 +147,32 @@ void Game::dealerTurn() {
     // - Once the dealer reaches a total of 17 or higher, they must hold
 
     // Draw while less than 17 or at hard 17
+    // Optionally add a "sleep" or "wait" timer in between dealer hits to slow down
+    //      console outputs and dispay each step more explicitly
     while(dealer.getHandTotal() < 17 || (dealer.getHandTotal() == 17 && dealer.hasSoftAce())) {
+        // Hit while less than 17
+        cout << "Dealer hits.\n";
+        dealer.addToHand(deck.draw());
+
         // If dealer busts at any point while hitting, dealer loses
         // This check also downsizes any soft Aces if they exist
         if(dealer.bust()) {
+            // Show dealer's hand & bust message
+            dealer.showHand();
             cout << "\n========================\n";
             cout << "\n Dealer busted! You win!\n";
             cout << "\n========================\n";
             user.addWin();
             pending(); // prompt user to play again
         }
-
-        // Hit while less than 17
-        cout << "Dealer hits.\n";
-        dealer.addToHand(deck.draw());
+        
         dealer.showHand();
     }
     // By this point, dealer is at hard 17 or a value greater than 17
     // Check if they've busted
     if(dealer.bust()) {
+        // Show dealer's hand & bust message
+        dealer.showHand();
         cout << "\n========================\n";
         cout << "\n Dealer busted! You win!\n";
         cout << "\n========================\n";
@@ -171,7 +180,7 @@ void Game::dealerTurn() {
         pending(); // prompt user to play again
     }
 
-    // If they're still under 21, compare
+    // If they're still at 21 and under, compare
     compare();
 }
 
@@ -190,8 +199,21 @@ void Game::hitOrStand(string &input) {
 }
 
 void Game::compare() {
-    //TODO remove placehold and replace with real code
-    cout << ">>>>>>>COMPARING TIME!\n";
+    if(user.getHandTotal() == dealer.getHandTotal()) {
+        cout << "\n===============\n";
+        cout << "\n     TIE!\n";
+        cout << "\n===============\n";
+    } else if(user.getHandTotal() > dealer.getHandTotal()) {
+        cout << "\n===============\n";
+        cout << " \n You win!!\n";
+        cout << "\n===============\n";
+        user.addWin();
+    } else {
+        cout << "\n===============\n";
+        cout << "  \nDealer wins!\n";
+        cout << "\n===============\n";
+    }
+    pending(); // prompt user to play again
 }
 
 Game::~Game() {

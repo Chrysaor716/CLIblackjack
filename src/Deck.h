@@ -21,7 +21,7 @@ public:
     // Value refers to the card's value in blackjack
     int getValue();
     // In the case of Ace, its value can change between 11 and 1
-    int changeValue(int val);
+    int setValue(int val);
     ~Card();
 private:
     string mType;

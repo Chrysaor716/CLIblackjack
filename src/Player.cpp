@@ -10,11 +10,18 @@ int Player::getHandTotal() {
     return handTotal;
 }
 
+// Note that one could search through hand for soft Aces (much like how
+//      a person would in real life), but this program uses a separate
+//      set to keep track of the indicies of the soft Aces in hand to
+//      manage the Aces. While it's a performance over space trade-off,
+//      it doesn't improve the performance much overall as there are
+//      only 4 Aces in a deck. This is acknowledgement of such and that
+//      searching through the hand would be a more realistic alternative.
 void Player::toggleAce() {
     // Change any existing Ace's value to a 1
     auto it = aces.begin(); // get an Ace index in hand
-    hand[*it].changeValue(1); // change to hard value
-    aces.erase(it); // remove hard ace from list
+    hand[*it].setValue(1); // change to hard value
+    aces.erase(it); // remove hard Ace from list
 
     // Subtract 10 from hand total since an 11 changed to a 1
     handTotal -= 10;
@@ -76,32 +83,12 @@ std::vector<Card> User::getHand() {
 
 void User::addWin() {
     roundsWon++;
-
-
-
-
-
-//TODO REMOVE
-cout << "-------- rounds won >>>>>>" << roundsWon << "\n";
-
-
-
-
-
 }
 
 int User::getWinPercentage(int numRounds) {
-    return (roundsWon / numRounds) * 100;
-
-
-
-
-//TODO REMOVE
-cout << "-------- rounds won (WP) >>>>>>" << roundsWon << "\n";
-
-
-
-
+    // Need to consider decimal precision for ratio computation
+    float percentage = (roundsWon / static_cast<float>(numRounds)) * 100;
+    return static_cast<int>(percentage);
 }
 
 User::~User() {}
