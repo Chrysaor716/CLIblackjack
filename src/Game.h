@@ -18,12 +18,16 @@ public:
     void deal();
     void userTurn();
     void dealerTurn();
+    // Repeated step that can be re-promted to user
+    void hitOrStand(string &input);
+    // This compares the players' hands at the end of each round
+    void compare();
+    
     ~Game();
 private:
     User user; // note that this can be an array instead if there are more players
     Dealer dealer;
 
-    int exitStatus; // Determines whether to end the game
     int round;
     Deck deck;
 };

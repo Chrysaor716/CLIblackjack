@@ -16,24 +16,21 @@ public:
     Player();
     // Returns sum of card values in hand
     int getHandTotal();
-    // On the occassion a card's value changes (particularly Aces), change hand's total;
-    //      only occurs when an Ace is present in hand
-    void updateHandTotal();
+    // Changes Ace's value from soft (11) to hard (1)
+    void toggleAce();
     // Adds a card to player's hand and updates total
     void addToHand(Card card);
-    // Returns number of cards in hand; used for inserting Ace indicies
-    int getHandSize();
-    // Adds Ace card index to set
-    void addAce(int idx);
     // Tells the game whether or not Player has a soft Ace (value 11) in hand
     bool hasSoftAce();
+    // Checks if player can downsize a soft Ace
+    bool bust();
+    // Returns hand; wildcard has to be added in for dealer
+    virtual std::vector<Card> getHand() = 0;
     // Deletes all cards from hand (done after returning cards to deck)
     void clearHand();
-    // Shows Player's hand. Dealt differently depending on whether the Player is the
-    //      user or dealer.
+    // Displays Player's hand. Dealt differently depending on whether the Player is the
+    //      user or dealer, since dealer has wildcard
     virtual void showHand() = 0;
-    // Returns hand to deck; dealer has wildcard not part of hand vector
-    virtual std::vector<Card> getHand() = 0;
     // Destructor
     ~Player();
 protected:
@@ -74,6 +71,8 @@ private:
 class Dealer : public Player {
 public:
     Dealer();
+    // Toggles dealer's turn flag & adds wildcard to hand
+    void setTurn(bool isInTurn);
     void showHand();
     std::vector<Card> getHand();
     void setWildcard(Card card);

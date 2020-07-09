@@ -13,11 +13,11 @@ The goal is to beat the dealer's hand without going over 21.
 - In each round, the player can:
     - "Hit" = draw another card from deck.
     - "Stand" = hold total in hand and end turn.
-- Once the player ends their turn, the dealer reveals the hidden card and then can also choose to hit until they stand.
-- A "bust" happens when your hand goes over 21. In this case, the dealer wins regardless of their hand.
 - If you are dealt 21 from the start (10 and Ace), you get a blackjack! This means you automatically win the round.
+- A "bust" happens when your hand goes over 21. In this case, the dealer wins regardless of their hand.
+- Once the player ends their turn, the dealer reveals the hidden card and then can also choose to hit until they stand.
 - Dealer will hit until their total is 17 or higher.
-- If the dealer goes over 21, the player wins the round.
+- If the dealer goes over 21 (bust), the player wins the round.
 - If the player's hand equals the dealer's hand, then it is a tie.
 
 #### Additional requirements:

@@ -7,7 +7,6 @@ using std::cout;
 using std::endl;
 
 Game::Game() {
-    exitStatus = false;
     round = 0;
     //deck.shuffle(); // Note: this is technically optional since it shuffles at the beginning anyway
     // Print intro info at start (optionally put this into separate helper function)
@@ -16,51 +15,49 @@ Game::Game() {
     cout << "Please refer to README for rules\n";
 }
 
-int Game::getExitStatus() {
-    return exitStatus;
-}
-
 void Game::pending() {
-    // Return cards in hand to deck, if any
-    if(user.getHandSize() > 0) {
+    // Return cards in hands to deck, if any
+    if(!user.getHand().empty()) {
         for(auto card : user.getHand()) {
             // Return each card back to bottom of deck
             deck.returnCard(card);
         }
         user.clearHand();
+        // Alternatively, one could iteratively pop cards from hand and add to bottom of deck
     }
-    if(dealer.getHandSize() > 0) {
+    if(!dealer.getHand().empty()) {
         for(auto card : dealer.getHand()) {
             deck.returnCard(card);
         }
         dealer.clearHand();
     }
+    // Dealer is not in turn at this stage
+    dealer.setTurn(false);
 
-    if(round % 6 == 0) 
+    if(round % 6 == 0) { 
+        cout << "---> Shuffling...\n";
         deck.shuffle();
+    }
 
     cout << "Start a new round? (y/n)\n";
-    cout << "Rounds played: " << round << endl;
+    cout << "> Rounds played: " << round << endl;
     // Print win percentage info if user has played at least 1 round
-    if(round) cout << "Current win percentage: " << user.getWinPercentage(round) << endl;
+    if(round) cout << "> Current win rate: " << user.getWinPercentage(round) << "%\n";
     cout << "> ";
-    string input;
-    // Loop infinitely until user gives input to start or end game
-    while(1) {
-        // Stretch goal: add regex to include variations of "yes" and "no" strings
-        cin >> input;
-        if(input == "y" || input == "Y") {
-            round++;
-            deal();
-        } else if(input == "n" || input == "N") {
-            cout << "Exiting...\n";
-            // TODO: exit program from here instead and change main function
-            exitStatus = true; // send exit status to main function
-            break;
-        } else {
-            cout << "Invalid input! Please enter 'y' or 'n': ";
-        }
+    string in;
+    cin >> in;
+    // Loop infinitely until user gives valid input to start or end game
+    // Stretch goal: add regex to include variations of "yes" and "no" strings
+    while(in != "y" && in != "Y" && in != "n" && in != "N") {
+        cout << "Invalid input! Please enter 'y' or 'n': ";
+        cin >> in;
     }
+    if(in == "y" || in == "Y") {
+        round++;
+        deal();
+    }
+    // If user entered "No", return and terminate program (zero indicates successful completion)
+    exit(0);
 }
 
 void Game::deal() {
@@ -70,29 +67,19 @@ void Game::deal() {
     //      (2 for user player and 2 for dealer).
     // This loop alternates drawing a card to the user and dealer
     //      by checking if iteration is even or odd.
-    cout << "\nDealing cards...\n";
+    cout << "\nDealing cards...\n\n";
     // Deal first 3 cards normally
-    Card card;
     for(int i = 0; i < 3; i++) {
-        // Removes top card from deck
-        card = deck.draw();
-        if(i%2 == 0) {
-            user.addToHand(card);
-            // If card was an Ace, add to Ace set
-            if(card.getType() == "Ace") {
-                // Ace inserted into hand was most recent index
-                user.addAce(user.getHandSize() - 1);
-            }
-        } else {
-            dealer.addToHand(card);
-            // If an Ace was dealt to the dealer, add to dealer's Ace set
-            if(card.getType() == "Ace") {
-                dealer.addAce(dealer.getHandSize() - 1);
-            }
-        }
+        if(i%2 == 0)
+            user.addToHand(deck.draw());
+        else
+            dealer.addToHand(deck.draw());
     }
     // Make 4th card the dealer's hidden card
-    dealer.setWildcard(deck.draw()); //TODO: need to consider if it's an Ace later on when card is revealed
+    // Note that technically we can draw the dealer's 2nd card once
+    //      it becomes the dealer's turn, since it's "random", but
+    //      this is to simply make the drawing more realistic
+    dealer.setWildcard(deck.draw());
 
     // Display the existing hands
     user.showHand();
@@ -105,26 +92,108 @@ void Game::deal() {
 void Game::userTurn() {
     // User automatically wins the round if drawn a 21 at the start.
     if(user.getHandTotal() == 21) {
-        cout << "\n====================\n";
-        cout << "Blackjack! You win!\n";
-        cout << "\n====================\n";
+        cout << "\n===================\n";
+        cout << "\nBlackjack! You win!\n";
+        cout << "\n===================\n";
         user.addWin();
         pending(); // prompt user to play again
     } else {
-        if(user.getHandTotal() > 21) {
-            // Check if total is hard or soft
-            if(user.hasSoftAce()) {
-                //TODO: remove below placeholder and replace with real code
-                cout << "Has soft ace\n";
+    // If it's not 21, this state can go 3 routes:
+    // - User hits: draw a card and add to hand total
+    // - User stands: holds total and move to dealer's turn
+    // - User busts: hand total exceeds 21 and user loses the round
+    //               (happens after hitting)
+        string input;
+        hitOrStand(input);
+        // User chooses to hit
+        while(input == "h" || input == "H") {
+            user.addToHand(deck.draw());
+            if(user.getHandTotal() > 21) {
+                // Checks if there are any hard Aces to downsize
+                if(user.bust()) {
+                    user.showHand();
+                    cout << "\n===================\n";
+                    cout << "\n Bust! You lose :(\n";
+                    cout << "\n===================\n";
+                    pending(); // prompt user to play another round
+                }
             }
+            user.showHand();
+            dealer.showHand(); //show dealer's hand alongside user's
+            // If user is at exactly 21, move on to dealer's turn
+            if(user.getHandTotal() == 21) {
+                cout << "---> 21! Your turn automatically ends. Dealer's turn...\n"; // let user know their turn has ended
+                dealerTurn();
+            }
+            // Else, if user hasn't busted yet, ask to continue hitting or stand
+            hitOrStand(input);
         }
-        // TODO: see state diagram & rules to continue game logic here
+        // Player is done hitting and hasn't busted; move to dealer
+        dealerTurn();
     }
 }
 
-void Game::dealerTurn() {}
+void Game::dealerTurn() {
+    cout << "Dealer moving...\n";
+    dealer.setTurn(true); // adds wildcard to dealer's hand and sum
+    user.showHand(); // show user's hand alongside dealer's hand
+    dealer.showHand(); // reveal wildcard
+    // At dealer's turn:
+    // - They must hit until their total is 17+
+    // - If they hit 17 with a soft Ace, they must hit again
+    // - If they bust, user wins
+    // - Once the dealer reaches a total of 17 or higher, they must hold
+
+    // Draw while less than 17 or at hard 17
+    while(dealer.getHandTotal() < 17 || (dealer.getHandTotal() == 17 && dealer.hasSoftAce())) {
+        // If dealer busts at any point while hitting, dealer loses
+        // This check also downsizes any soft Aces if they exist
+        if(dealer.bust()) {
+            cout << "\n========================\n";
+            cout << "\n Dealer busted! You win!\n";
+            cout << "\n========================\n";
+            user.addWin();
+            pending(); // prompt user to play again
+        }
+
+        // Hit while less than 17
+        cout << "Dealer hits.\n";
+        dealer.addToHand(deck.draw());
+        dealer.showHand();
+    }
+    // By this point, dealer is at hard 17 or a value greater than 17
+    // Check if they've busted
+    if(dealer.bust()) {
+        cout << "\n========================\n";
+        cout << "\n Dealer busted! You win!\n";
+        cout << "\n========================\n";
+        user.addWin();
+        pending(); // prompt user to play again
+    }
+
+    // If they're still under 21, compare
+    compare();
+}
+
+void Game::hitOrStand(string &input) {
+    cout << "What would you like to do?\n"
+         << "Press 'h' to hit (draw a card).\n"
+         << "Press 's' to stand (hold total).\n"
+         << "> ";
+    cin >> input;
+    // Loop indefinitely until user enters valid input
+    // Optional: allow user to quit game here (mid-game)
+    while(input != "h" && input != "H" && input != "s" && input != "S") {
+        cout << "Invalid input! Please enter 'h' or 's': ";
+        cin >> input;
+    }
+}
+
+void Game::compare() {
+    //TODO remove placehold and replace with real code
+    cout << ">>>>>>>COMPARING TIME!\n";
+}
 
 Game::~Game() {
-    exitStatus = true;
     round = 0;
 }

@@ -16,7 +16,9 @@ class Card {
 public:
     Card(); // default constructor
     Card(string type, int index, int value); // init constructor
+    // Type refers to Ace, King, Queen, Jack, 2-10
     string getType();
+    // Value refers to the card's value in blackjack
     int getValue();
     // In the case of Ace, its value can change between 11 and 1
     int changeValue(int val);
@@ -47,9 +49,10 @@ public:
     void shuffle();
     // Draws a card from the top of the deck
     Card draw();
-    // Returns card to deck
+    // Returns card to bottom of deck
     void returnCard(Card card);
     ~Deck();
+
 private:
     static const int NUM_CARDS_IN_DECK = 52;
     std::vector<Card> cards;
